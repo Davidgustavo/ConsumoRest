@@ -1560,15 +1560,31 @@
             var footer = [];
             column.aggregates.forEach(function(a) {
 
-              var typeForLabel = '#='+ a.type + '#';
+              var typeForLabel = '#=data.' + column.field + ' ? data.' + column.field + '.' + a.type + ' : 0 #';
               if (a.type == 'average' || a.type == 'sum') {
-                typeForLabel = "#=useMask("+ a.type + ",'"+column.format+"','"+column.type+"')#";
+                typeForLabel = "#=useMask(data." + column.field  + " ? data." + column.field + "." + a.type + " : 0" + ",'" + column.format + "','" + column.type + "')#";
               }
 
-              if (!group)
-                footer.push(a.footerTemplate + ': ' + typeForLabel);
-              else
-                footer.push(a.groupFooterTemplate + ': ' + typeForLabel);
+              var typeForTemplate = group ? a.groupFooterTemplate : a.footerTemplate;
+
+              if (typeForTemplate) {
+                typeForTemplate = typeForTemplate + ': ';
+              } else {
+                typeForTemplate = '';
+              }
+
+              var footerTemplate = typeForTemplate + typeForLabel;
+
+              if (column.alignment) {
+                // alinha o rodapé ao conteúdo quando o alinhamento selecionado for 'Direita'
+                if (column.alignment === 'right' && !group) {
+                  footerTemplate = '<div style="text-align: ' + column.alignment + '" class="k-fix-margin">' + footerTemplate + '</div>';
+                } else {
+                  footerTemplate = '<div style="text-align: ' + column.alignment + '">' + footerTemplate + '</div>';
+                }
+              }
+
+              footer.push(footerTemplate);
             });
             return footer.join('<br/>');
           }
@@ -1581,6 +1597,17 @@
               || column.type.startsWith('money') || column.type.startsWith('number')
               || column.type.startsWith('tel') || (column.format && column.format != 'null')   ) {
             return column.headerText +": #=useMask(value,'"+column.format+"','"+column.type+"')#";
+          }
+          return undefined;
+        }
+
+        function getAttributes(column) {
+          if (column && column.alignment) {
+            var attributes = {
+              style: "text-align: " + column.alignment + ";"
+            };
+
+            return attributes;
           }
           return undefined;
         }
@@ -1606,6 +1633,8 @@
               addColumn.footerTemplate = getAggregateFooter(column, false);
               addColumn.groupFooterTemplate = getAggregateFooter(column, true);
               addColumn.groupHeaderTemplate = getAggregateHeader(column);
+              addColumn.attributes = getAttributes(column);
+              addColumn.headerAttributes = addColumn.attributes;
               columns.push(addColumn);
             }
             else if (column.dataType == "Command") {
@@ -1646,6 +1675,9 @@
               else {
                 className = 'k-custom-command' + (label ? ' k-button-with-label' : '');
               }
+              if (column.theme)
+                className += ' ' + column.theme;
+
               var addColumn = {
                 command: [{
                   name: app.common.generateId(),
@@ -1883,7 +1915,7 @@
           return hasFilterableColumn;
         };
 
-        var datasource = app.kendoHelper.getDataSource(options.dataSourceScreen.entityDataSource, scope, options.allowPaging, options.pageCount, options.columns);
+        var datasource = app.kendoHelper.getDataSource(options.dataSourceScreen.entityDataSource, scope, options.allowPaging, options.pageCount, options.columns, options.groupings);
 
         var columns = this.getColumns(options, datasource, scope);
         var pageAble = this.getPageAble(options);
@@ -3005,6 +3037,149 @@
       }
     }
   })
+  
+  .directive('cronDynamicMenu', ['$compile', function($compile){
+    'use strict';
+
+    return {
+      restrict: 'EA',
+      populateItems: function(items) {
+        var template = '';
+        
+        if (items && items != null && Array.isArray(items)) {
+          items.forEach(function(item) {
+            var security = (item.security && item.security != null) ? ' cronapp-security="' + item.security + '" ' : '';
+            var action = (item.action && item.action != null) ? ' ng-click="' + item.action + '" ' : '';
+            var hide = (item.hide && item.hide != null) ? ' ng-hide="' + item.hide + '" ' : '';
+            var iconClass = (item.iconClass && item.iconClass != null) ? '<i class="'+ item.iconClass +'"></i>' : '';
+            var title = '<span>' + item.title + '</span>';
+
+            template = template + '<li'+ hide +'><a href=""' + security + action + '>' + iconClass + title + '</a></li>'; 
+          });
+
+          if (template != '') {
+            template = '<ul class="dropdown-menu">' + template + '</ul>';
+          }
+        }
+
+        return template;
+      },
+      populateMenu: function(menuOptions) {
+        var template = '';
+
+        if (menuOptions && menuOptions!= null && menuOptions.subMenuOptions && menuOptions.subMenuOptions != null && Array.isArray(menuOptions.subMenuOptions)){
+          var _populateItems = this.populateItems;
+          menuOptions.subMenuOptions.forEach(function(menu) {
+            var security = (menu.security && menu.security != null) ? ' cronapp-security="' + menu.security + '" ' : '';
+            var action = (menu.action && menu.action != null) ? ' ng-click="' + menu.action + '" ' : '';
+            var caret = (menu.menuItems && Array.isArray(menu.menuItems) && (menu.menuItems.length > 0)) ? '<span class="caret"></span>' : '';
+            var hide = (menu.hide && menu.hide != null) ? ' ng-hide="' + menu.hide + '" ' : '';
+            var iconClass = (menu.iconClass && menu.iconClass != null) ? '<i class="'+ menu.iconClass +'"></i>' : '';
+            var title = '<span>' + menu.title + '</span>';
+            
+            template = template  + '\
+              <li class="dropdown component-holder crn-menu-item" data-component="crn-menu-item"' + security + hide + '>\
+                <a href="" ' + action + ' class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">\
+                ' + iconClass + title + caret + _populateItems(menu.menuItems) + '\
+                </a> \
+              </li>';
+          })
+        }
+
+        return template;
+      },
+      link: function(scope, element, attrs) {
+        var TEMPLATE_MAIN = '<ul class="nav navbar-nav" style="float:none"></ul>';  
+        var options = {};
+        try {
+          options = JSON.parse(attrs.options);
+        } catch(e) {
+          console.log('CronDynamicMenu: Invalid configuration!')
+        }
+
+        var main = $(TEMPLATE_MAIN);
+        var menus = this.populateMenu(options);
+        main.append(menus);
+
+        var newElement = angular.element(main);
+        element.html('');
+        element.append(main);
+        element.attr('id' , null);
+        $compile(newElement)(scope);
+      }
+    }
+  }])
+
+  .directive('ngInitialValue', function($parse) {
+    return {
+      restrict: 'A',
+      require: 'ngModel',
+      link: function(scope, element, attrs, ngModelCtrl) {
+        if (attrs.ngInitialValue) {
+          var modelGetter = $parse(attrs['ngModel']);
+          var modelSetter = modelGetter.assign;
+          var evaluated;
+
+          try {
+            evaluated = scope.$eval(attrs.ngInitialValue);
+          } catch (e) {
+            evaluated = attrs.ngInitialValue;
+          }
+
+          // verifica se é um checkbox para transformar para um valor booleano
+          if (element[0].type == 'checkbox' && evaluated) {
+            evaluated = ('' + evaluated).toLowerCase() == 'true';
+          }
+
+          modelSetter(scope, evaluated);
+        }
+      }
+    }
+  })
+
+  .directive('crnAllowNullValues', [function () {
+    return {
+      restrict: 'A',
+      require: '?ngModel',
+      link: function (scope, el, attrs, ctrl) {
+        if (attrs.crnAllowNullValues == 'true') {
+          ctrl.$formatters = [];
+          ctrl.$parsers = [];
+          ctrl.$render = function () {
+            var viewValue = ctrl.$viewValue;
+            el.data('checked', viewValue);
+            switch (viewValue) {
+              case true:
+                el.prop('indeterminate', false);
+                el.prop('checked', true);
+                break;
+              case false:
+                el.prop('indeterminate', false);
+                el.prop('checked', false);
+                break;
+              default:
+                el.prop('indeterminate', true);
+            }
+          };
+          el.bind('click', function () {
+            var checked;
+            switch (el.data('checked')) {
+              case false:
+                checked = true;
+                break;
+              case true:
+                checked = null;
+                break;
+              default:
+                checked = false;
+            }
+            ctrl.$setViewValue(checked);
+            scope.$apply(ctrl.$render);
+          });
+        }
+      }
+    };
+  }])
 
 }(app));
 
@@ -3185,8 +3360,14 @@ function maskDirective($compile, $translate, $parse, attrName) {
 
               if (useUTC) {
                 momentDate = moment.utc(value);
+                if(!momentDate.isValid()){
+                  momentDate = moment.utc(value, mask);
+                }
               } else {
                 momentDate = moment(value);
+                if(!momentDate.isValid()){
+                  momentDate = moment(value, mask);
+                }
               }
 
               return momentDate.format(mask);
@@ -3450,7 +3631,7 @@ app.kendoHelper = {
     }
     return schema;
   },
-  getDataSource: function(dataSource, scope, allowPaging, pageCount, columns) {
+  getDataSource: function(dataSource, scope, allowPaging, pageCount, columns, groupings) {
     var schema = this.getSchema(dataSource);
     if (columns) {
       columns.forEach(function(c) {
@@ -3818,6 +3999,17 @@ app.kendoHelper = {
     datasource.schema.total = function(){
       return datasource.transport.options.cronappDatasource.getRowsCount();
     };
+
+    if (groupings) {
+      datasource.group = [];
+
+      groupings.forEach(function(g) {
+        var group = { field: g.field, aggregates: datasource.aggregate };
+
+        datasource.group.push(group);
+      });
+    }
+
     return datasource;
   },
   getEventReadCombo: function (e) {
@@ -3914,8 +4106,8 @@ app.kendoHelper = {
     if (options) {
       if (!options.dynamic || options.dynamic=='false') {
         valuePrimitive = true;
-        options.dataValueField = 'key';
-        options.dataTextField = 'value';
+        options.dataValueField = 'value';
+        options.dataTextField = 'key';
         dataSource.data = (options.staticDataSource == null ? undefined : options.staticDataSource);
         for (i = 0; i < dataSource.data.length; i++) {
           try {

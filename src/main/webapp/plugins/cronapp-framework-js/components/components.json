@@ -82,8 +82,8 @@
       "text_en_US": "Button",
       "order": 5,
       "class": "adjust-icon mdi mdi-stop",
-      "wrapper": false,
-      "autoWrapper": true,
+      "wrapper": true,
+      "autoWrapper": false,
       "templateURL": "src/main/webapp/plugins/cronapp-framework-js/dist/components/templates/button.template.html",
       "properties": {
         "ng-init": {
@@ -256,6 +256,22 @@
           "name": "content",
           "selector": "span",
           "type": "content"
+        },
+        {
+          "name": "xattr-size",
+          "selector": "button"
+        },
+        {
+          "name": "xattr-theme",
+          "selector": "button"
+        },
+        {
+          "name": "xattr-fullsize",
+          "selector": "button"
+        },
+        {
+          "name": "xattr-disabled",
+          "selector": "button"
         }
       ]
     },
@@ -2553,6 +2569,14 @@
         ]
       },
       "childrenProperties": [
+	    {
+          "name": "options",
+          "selector": "cron-dynamic-menu",
+          "displayName_pt_BR": "Configuração",
+          "displayName_en_US": "Configuration",
+          "type": "text",
+          "order": 1
+        },
         {
           "name": "ng-init",
           "selector": "nav",
@@ -4802,6 +4826,22 @@
       },
       "childrenProperties": [
         {
+          "name": "ng-initial-value",
+          "selector": "input",
+          "displayName_pt_BR": "Valor Inicial",
+          "displayName_en_US": "Initial Value",
+          "type": "logic",
+          "order": 3
+        },
+        {
+          "name": "crn-allow-null-values",
+          "selector": "input",
+          "displayName_pt_BR": "Permite Valores Nulos",
+          "displayName_en_US": "Allow Null Values",
+          "type": "logic",
+          "order": 4
+        },
+        {
           "name": "ng-model",
           "selector": "input",
           "type": "text",
@@ -4980,6 +5020,36 @@
           "onDisplay": "javascript:function() { return arguments[0].replace('vars.',''); }",
           "type": "text",
           "order": 2
+        }
+      ]
+    },
+    {
+      "name": "crn-dynamic-menu",
+      "text_pt_BR": "Menu Dinâmico",
+      "text_en_US": "Dynamic Menu",
+      "class": "adjust-icon mdi mdi-menu",
+      "order": 11,  
+      "wrapper": false,
+      "designTimeDynamic": true,
+      "designTimeHTMLURL": "src/main/webapp/plugins/cronapp-framework-js/dist/components/templates/cron-dynamic-menu.designtime.html",
+      "designTimeSelector": ":self",      
+      "templateURL": "src/main/webapp/plugins/cronapp-framework-js/dist/components/templates/cron-dynamic-menu.template.html",
+      "properties": {
+        "class": {
+          "order": 9999
+        },
+        "id": {
+          "order": 1
+        }
+      },
+      "childrenProperties": [
+        {
+          "name": "options",
+          "selector": "cron-dynamic-menu",
+          "displayName_pt_BR": "Configuração",
+          "displayName_en_US": "Configuration",
+          "type": "text",
+          "order": 1
         }
       ]
     }

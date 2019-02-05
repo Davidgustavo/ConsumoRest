@@ -2433,6 +2433,10 @@ angular.module('datasourcejs', [])
       return result;
     }.bind(this);
 
+    this.isEmpty = function(value) {
+      return value === '' || value === undefined || value === null || value === '\'\'' || value === 'null';
+    }
+
     this.parserOdata = function (data, strategy, resultData) {
       var result = '';
       var operation = data.type;
@@ -2450,13 +2454,13 @@ angular.module('datasourcejs', [])
 
             var value = this.parserOdata(arg, strategy)
 
-            if ((value == '\'\'' || value == 'null' || value == '') && (strategy == 'ignore' || strategy == 'clean')) {
+            if (this.isEmpty(value) && (strategy == 'ignore' || strategy == 'clean')) {
               if (resultData) {
                 resultData.clean = (strategy == 'clean');
               }
             } else {
 
-              if (value != '' && value != undefined && value != null) {
+              if (!this.isEmpty(value)) {
                 if (result != '') {
                   result += ' ' + oper.toLowerCase() + ' ';
                 }
@@ -2467,12 +2471,12 @@ angular.module('datasourcejs', [])
           } else {
             var value = executeRight(arg.right);
 
-            if ((value == '\'\'' || value == 'null' || value == '') && (strategy == 'ignore' || strategy == 'clean')) {
+            if (this.isEmpty(value) && (strategy == 'ignore' || strategy == 'clean')) {
               if (resultData) {
                 resultData.clean = (strategy == 'clean');
               }
             } else {
-              if (value != '' && value != undefined && value != null) {
+              if (!this.isEmpty(value)) {
                 if (result != '') {
                   result += ' ' + oper.toLowerCase() + ' ';
                 }
@@ -2722,7 +2726,7 @@ angular.module('datasourcejs', [])
             var filterClause;
 
             var g = DEP_PATTERN.exec(binaryExpression[1]);
-            if ((!binary[1] || binary[1] == "''") && this.dependentLazyPost && g[1] && g[1].startsWith(this.dependentLazyPost+".")) {
+            if (this.isEmpty(binary[1]) && this.dependentLazyPost && g[1] && g[1].startsWith(this.dependentLazyPost+".")) {
               if (this.parametersNullStrategy == "clean" || this.parametersNullStrategy == "default") {
                 cleanData = true;
                 var dds = eval(this.dependentLazyPost);
@@ -2733,7 +2737,7 @@ angular.module('datasourcejs', [])
                 }
               }
             } else {
-              if (!binary[1] || binary[1] == "''") {
+              if (this.isEmpty(binary[1])) {
                 if (this.parametersNullStrategy == "clean" || this.parametersNullStrategy == "default") {
                   filterClause = 'null';
                   cleanData = true;
@@ -3203,6 +3207,9 @@ angular.module('datasourcejs', [])
 
         if (window.dataSourceMap && window.dataSourceMap[dts.entity]) {
           dts.entity = window.dataSourceMap[dts.entity].serviceUrlODATA || window.dataSourceMap[dts.entity].serviceUrl;
+          if(dts.entity.charAt(0) === "/"){
+            dts.entity = dts.entity.substr(1);
+          }
         }
 
         if (app && app.config && app.config.datasourceApiVersion) {
@@ -3559,7 +3566,10 @@ angular.module('datasourcejs', [])
           datasource.entity = value;
 
           if (window.dataSourceMap && window.dataSourceMap[datasource.entity]) {
-            datasource.entity = window.dataSourceMap[datasource.entity].serviceUrlODATA || window.dataSourceMap[datasource.entity].serviceUrl;;
+            datasource.entity = window.dataSourceMap[datasource.entity].serviceUrlODATA || window.dataSourceMap[datasource.entity].serviceUrl;
+            if(datasource.entity.charAt(0) === "/"){
+              datasource.entity = datasource.entity.substr(1);
+            }
           }
 
           if (!firstLoad.entity) {

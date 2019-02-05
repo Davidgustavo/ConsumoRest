@@ -52,9 +52,11 @@ public static Var RestObjetos() throws Exception {
         i = Var.valueOf(it_i.next());
         objeto = cronapi.json.Operations.getJsonOrMapField(i, Var.valueOf("id"));
         System.out.println(objeto.getObjectAsString());
-        objeto = cronapi.json.Operations.getJsonOrMapField(i, Var.valueOf("date"));
+        objeto = cronapi.json.Operations.getJsonOrMapField(i, Var.valueOf("title.rendered"));
+        cronapi.util.Operations.callClientFunction(Var.valueOf("cronapi.screen.changeValueOfField"), Var.valueOf("vars.titulo1"), objeto);
         System.out.println(objeto.getObjectAsString());
-        objeto = cronapi.json.Operations.getJsonOrMapField(i, Var.valueOf("status"));
+        objeto = cronapi.json.Operations.getJsonOrMapField(i, Var.valueOf("content.rendered"));
+        cronapi.util.Operations.callClientFunction(Var.valueOf("cronapi.screen.changeValueOfField"), Var.valueOf("vars.titulo2"), objeto);
         System.out.println(objeto.getObjectAsString());
     } // end for
     return Var.VAR_NULL;
