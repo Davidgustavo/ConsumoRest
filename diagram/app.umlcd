@@ -433,6 +433,125 @@
           "display": "normal"
         }
       }
+    },
+    {
+      "type": "uml.Class",
+      "name": "teste",
+      "attributes": [
+        "id:java.lang.String",
+        "nome:java.lang.String"
+      ],
+      "methods": [],
+      "position": {
+        "x": 548,
+        "y": 126
+      },
+      "size": {
+        "width": 155.328125,
+        "height": 107.86979293823242
+      },
+      "angle": 0,
+      "multitenantContextJsonIgnore": "false",
+      "multitenantContextIgnoreEntities": "",
+      "role": "Auto",
+      "queries": [],
+      "tableName": null,
+      "realName": "",
+      "tableScheme": null,
+      "generateView": "Auto",
+      "isRest": "true",
+      "multitenantContext": "",
+      "restSecurity": null,
+      "restPath": "",
+      "id": "b9391f55-8d7a-43d9-b3d2-dca7b3500114",
+      "fields": [
+        {
+          "name": "id",
+          "type": "java.lang.String",
+          "dbName": "id",
+          "dbLength": "",
+          "dbPrecision": "",
+          "dbScale": "",
+          "dbDefaultValue": "UUID.randomUUID().toString().toUpperCase()",
+          "label": "Id",
+          "mask": "",
+          "isPrimaryKey": true,
+          "isUniqueKey": false,
+          "isNullable": false,
+          "pkType": "UUID",
+          "multitenantContext": "",
+          "jsonIgnore": false,
+          "isTransient": false,
+          "isInsertable": true,
+          "isUpdatable": true,
+          "isEncryption": false,
+          "referencedColumnName": "",
+          "isSearchable": false
+        },
+        {
+          "name": "nome",
+          "type": "java.lang.String",
+          "dbName": "nome",
+          "dbLength": "",
+          "dbPrecision": "",
+          "dbScale": "",
+          "dbDefaultValue": "",
+          "label": "Nome",
+          "mask": "",
+          "isPrimaryKey": false,
+          "isUniqueKey": false,
+          "isNullable": true,
+          "pkType": "",
+          "multitenantContext": "",
+          "jsonIgnore": false,
+          "isTransient": false,
+          "isInsertable": true,
+          "isUpdatable": true,
+          "isEncryption": false,
+          "referencedColumnName": "",
+          "isSearchable": false
+        }
+      ],
+      "runtimeClass": "cronos.widgets.joint.uml.Class",
+      "z": 12,
+      "attrs": {
+        "rect": {
+          "stroke": "yellow",
+          "stroke-width": 2
+        },
+        ".uml-class-name-rect": {
+          "height": 50,
+          "transform": "translate(0,0)"
+        },
+        ".uml-class-attrs-rect": {
+          "height": 70,
+          "transform": "translate(0,50)"
+        },
+        ".uml-class-methods-rect": {
+          "height": 30,
+          "transform": "translate(0,120)"
+        },
+        ".uml-class-name-text": {
+          "fill": "#000",
+          "font-size": 12,
+          "text": "teste",
+          "font-weight": "bold"
+        },
+        ".uml-class-attrs-text": {
+          "font-size": 11,
+          "text": "id\nnome\n"
+        },
+        ".uml-class-attrs-value": {
+          "ref-x": 61.515625,
+          "font-size": 11,
+          "text": "java.lang.String\njava.lang.String\n"
+        },
+        ".uml-class-methods-text": {
+          "fill": "#0066FF",
+          "font-size": 11,
+          "text": ""
+        }
+      }
     }
   ],
   "selectedGroup": "1d7f906f-a526-482d-aaf4-08d227ae8c18",
@@ -450,7 +569,8 @@
       "id": "1d7f906f-a526-482d-aaf4-08d227ae8c18",
       "cells": [
         "d2e50f97-0b9e-4037-94ba-af64568af247",
-        "1df87f56-c5ba-47f5-8e68-82931f49b989"
+        "1df87f56-c5ba-47f5-8e68-82931f49b989",
+        "b9391f55-8d7a-43d9-b3d2-dca7b3500114"
       ]
     }
   ]
